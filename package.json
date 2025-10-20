@@ -5,20 +5,31 @@
   "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
-    "build": "tsc",
-    "build:watch": "tsc -w",
+    "dev": "npm run dev:react && npm run dev:electron",
+    "dev:react": "vite",
+    "dev:electron": "tsc -p tsconfig.electron.json && electron .",
+    "build": "npm run build:react && npm run build:electron",
+    "build:react": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build:watch": "npm run build:watch:react && npm run build:watch:electron",
+    "build:watch:react": "vite build --watch",
+    "build:watch:electron": "tsc -p tsconfig.electron.json --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Quinzell",
   "license": "MIT",
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.15",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
     "electron": "^38.3.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^7.1.11"
   },
   "dependencies": {
+    "babel-plugin-react-compiler": "^1.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   }
