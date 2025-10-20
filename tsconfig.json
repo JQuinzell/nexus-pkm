@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "noImplicitAny": true,
+    "outDir": "dist",
+    "jsx": "react"
+  },
+  "include": ["src/**/*"]
+}
