@@ -27,7 +27,7 @@ export function Dashboard() {
               orientation='vertical'
               className='mr-2 data-[orientation=vertical]:h-4'
             />
-            <Breadcrumb>
+            {/* <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className='hidden md:block'>
                   <BreadcrumbLink href='#'>components</BreadcrumbLink>
@@ -41,7 +41,7 @@ export function Dashboard() {
                   <BreadcrumbPage>button.tsx</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
-            </Breadcrumb>
+            </Breadcrumb> */}
           </header>
           <div className='flex flex-1 flex-col gap-4 p-4'>
             <div className='grid auto-rows-min gap-4 md:grid-cols-3'>

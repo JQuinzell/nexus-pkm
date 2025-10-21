@@ -1,29 +1,11 @@
-import { createContext, useContext, type PropsWithChildren } from 'react'
-
-type FileTreeItem = string | [string, ...FileTreeItem[]]
-type FileTree = FileTreeItem[]
-
-const data: FileTree = [
-  [
-    'app',
-    [
-      'api',
-      ['hello', ['route.ts']],
-      'page.tsx',
-      'layout.tsx',
-      ['blog', ['page.tsx']],
-    ],
-  ],
-  ['components', ['ui', 'button.tsx', 'card.tsx'], 'header.tsx', 'footer.tsx'],
-  ['lib', ['util.ts']],
-  ['public', 'favicon.ico', 'vercel.svg'],
-  '.eslintrc.json',
-  '.gitignore',
-  'next.config.js',
-  'tailwind.config.js',
-  'package.json',
-  'README.md',
-]
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from 'react'
+import type { FileTree } from './FileTree'
 
 const FileTreeContext = createContext<FileTree>([])
 
@@ -34,7 +16,16 @@ export function useFileTree() {
 }
 
 export function FileTreeProvider({ children }: PropsWithChildren) {
+  const [value, setValue] = useState<FileTree>([])
+
+  useEffect(() => {
+    const tree = window.api.getFileTree()
+    setValue(tree)
+  }, [])
+
   return (
-    <FileTreeContext.Provider value={data}>{children}</FileTreeContext.Provider>
+    <FileTreeContext.Provider value={value}>
+      {children}
+    </FileTreeContext.Provider>
   )
 }

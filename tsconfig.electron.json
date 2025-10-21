@@ -11,6 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["src/main.ts"],
-  "exclude": ["src/app.tsx", "node_modules", "dist"]
+  "include": ["src/electron"],
+  "exclude": ["node_modules", "dist"]
 }

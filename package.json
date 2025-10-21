@@ -2,7 +2,7 @@
   "name": "nexus-pkm",
   "version": "1.0.0",
   "description": "A PKM app inspired by Obsidian",
-  "main": "dist/main.js",
+  "main": "dist/electron/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "npm run dev:react && npm run dev:electron",
