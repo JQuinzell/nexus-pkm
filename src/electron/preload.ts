@@ -1,15 +1,14 @@
 import { contextBridge } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
-
-// TOD: how can I bridge the types between these projects? Right now I'm just redeclaring to avoid build issues
-type FileTreeItem = string | [string, ...FileTreeItem[]]
-type FileTree = FileTreeItem[]
+import { FileTree, FileTreeNode } from '..'
 
 const vaultPath = path.join(__dirname, '../../data')
 
-function getFileTree(dirPath: string = vaultPath): FileTree {
-  // Read all items in the current directory
+function getFileTree(
+  dirPath: string = vaultPath,
+  parent?: FileTreeNode
+): FileTree {
   const entries = fs.readdirSync(dirPath)
 
   const tree: FileTree = []
@@ -17,13 +16,19 @@ function getFileTree(dirPath: string = vaultPath): FileTree {
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry)
     const stats = fs.statSync(fullPath)
-
-    if (stats.isDirectory()) {
-      const subTree = getFileTree(fullPath)
-      tree.push([entry, ...subTree])
-    } else {
-      tree.push(entry)
+    const type = stats.isDirectory() ? 'folder' : 'file'
+    const node: FileTreeNode = {
+      id: fullPath,
+      name: entry,
+      type,
+      children: [],
+      parent,
     }
+    if (type === 'folder') {
+      const subTrees = getFileTree(fullPath, node)
+      node.children = subTrees
+    }
+    tree.push(node)
   }
 
   return tree

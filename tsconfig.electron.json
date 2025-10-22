@@ -11,6 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["src/electron"],
+  "include": ["src/electron", "src/index.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

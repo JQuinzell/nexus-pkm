@@ -5,9 +5,17 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react'
-import type { FileTree } from './FileTree'
+import type { FileTree } from '..'
 
-const FileTreeContext = createContext<FileTree>([])
+export type FileTreeContextValue = {
+  tree: FileTree
+  selectedFilePath: string[] | null
+}
+
+const FileTreeContext = createContext<FileTreeContextValue>({
+  tree: [],
+  selectedFilePath: null,
+})
 
 export function useFileTree() {
   const context = useContext(FileTreeContext)
@@ -16,12 +24,17 @@ export function useFileTree() {
 }
 
 export function FileTreeProvider({ children }: PropsWithChildren) {
-  const [value, setValue] = useState<FileTree>([])
+  const [tree, setTree] = useState<FileTree>([])
 
   useEffect(() => {
     const tree = window.api.getFileTree()
-    setValue(tree)
+    setTree(tree)
   }, [])
+
+  const value = {
+    tree,
+    selectedFilePath: null,
+  }
 
   return (
     <FileTreeContext.Provider value={value}>
