@@ -22,7 +22,7 @@ import { useFileTree } from '@/FileTree/FileTreeContext'
 import type { FileTreeNode } from '..'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { tree } = useFileTree()
+  const { tree, setSelectedFile, selectedFile } = useFileTree()
   return (
     <Sidebar {...props}>
       <SidebarContent>
@@ -34,9 +34,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Tree
                   key={index}
                   item={item}
-                  onClick={(clickedItem) =>
-                    console.log(clickedItem.id, clickedItem.name)
-                  }
+                  onClick={(selectedItem) => {
+                    setSelectedFile(selectedItem)
+                  }}
+                  selectedFile={selectedFile}
                 />
               ))}
             </SidebarMenu>
@@ -51,9 +52,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 function Tree({
   item,
   onClick,
+  selectedFile,
 }: {
   item: FileTreeNode
   onClick?: (item: FileTreeNode) => void
+  selectedFile: FileTreeNode | null
 }) {
   const name = item.name
   const items = item.children
@@ -65,8 +68,8 @@ function Tree({
   if (!items.length) {
     return (
       <SidebarMenuButton
-        isActive={name === 'button.tsx'}
-        className='data-[active=true]:bg-transparent'
+        isActive={item.id === selectedFile?.id}
+        className='data-[active=true]:bg-accent'
         onClick={() => handleClick(item)}
       >
         <File />
@@ -91,7 +94,12 @@ function Tree({
         <CollapsibleContent>
           <SidebarMenuSub>
             {items.map((subItem, index) => (
-              <Tree key={index} item={subItem} onClick={handleClick} />
+              <Tree
+                key={index}
+                item={subItem}
+                onClick={handleClick}
+                selectedFile={selectedFile}
+              />
             ))}
           </SidebarMenuSub>
         </CollapsibleContent>
