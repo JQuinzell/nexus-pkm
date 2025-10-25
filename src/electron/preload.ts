@@ -37,7 +37,12 @@ async function getFile(file: FileTreeNode) {
   return contents.toString()
 }
 
+async function writeFile(file: FileTreeNode, contents: string) {
+  await fs.promises.writeFile(file.id, contents)
+}
+
 contextBridge.exposeInMainWorld('api', {
   getFileTree,
   getFile,
+  writeFile,
 })

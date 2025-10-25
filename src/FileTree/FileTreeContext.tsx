@@ -9,6 +9,7 @@ import type { FileTree, FileTreeNode } from '..'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
   $convertFromMarkdownString,
+  $convertToMarkdownString,
   ELEMENT_TRANSFORMERS,
   HEADING,
   TEXT_FORMAT_TRANSFORMERS,
@@ -67,13 +68,23 @@ export function useFileContents(file: FileTreeNode | null) {
     }
 
     window.api.getFile(selectedFile).then((contents) => {
-      console.log('Got contents')
-      console.log(contents)
       editor.update(() => {
         $convertFromMarkdownString(contents)
       })
     })
   }, [file])
+
+  useEffect(() => {
+    if (!selectedFile) return
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        window.api.writeFile(
+          selectedFile,
+          $convertToMarkdownString(TRANSFORMERS)
+        )
+      })
+    })
+  }, [editor, selectedFile])
 
   return fileContents
 }

@@ -9,6 +9,8 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { useEffect, type PropsWithChildren } from 'react'
 import { useFileContents, useFileTree } from './FileTree/FileTreeContext'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { $convertToMarkdownString } from '@lexical/markdown'
 function onError(error: unknown) {
   console.error(error)
 }
@@ -27,6 +29,7 @@ export function EditorProvider({ children }: PropsWithChildren) {
 }
 
 export function Editor() {
+  const [editor] = useLexicalComposerContext()
   const { selectedFile } = useFileTree()
   useFileContents(selectedFile)
   const placeholder = 'Enter your text here...'

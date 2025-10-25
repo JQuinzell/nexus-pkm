@@ -10,6 +10,7 @@ export type FileTree = FileTreeNode[]
 export interface ElectronAPI {
   getFileTree: () => FileTree
   getFile: (file: FileTreeNode) => Promise<string>
+  writeFile: (file: FileTreeNode, contents: string) => Promise<void>
 }
 
 declare global {
