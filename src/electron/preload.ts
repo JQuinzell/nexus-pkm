@@ -11,9 +11,7 @@ function getFileTree(
 ): FileTree {
   const entries = fs.readdirSync(dirPath)
 
-  const tree: FileTree = []
-
-  for (const entry of entries) {
+  const tree: FileTree = entries.map((entry) => {
     const fullPath = path.join(dirPath, entry)
     const stats = fs.statSync(fullPath)
     const type = stats.isDirectory() ? 'folder' : 'file'
@@ -28,8 +26,8 @@ function getFileTree(
       const subTrees = getFileTree(fullPath, node)
       node.children = subTrees
     }
-    tree.push(node)
-  }
+    return node
+  })
 
   return tree
 }
