@@ -1,0 +1,35 @@
+export default {
+  code: 'font-mono bg-gray-100 p-1 rounded',
+  heading: {
+    h1: 'text-3xl font-extrabold my-4',
+    h2: 'text-2xl font-bold my-3',
+    h3: 'text-xl font-semibold my-2',
+    h4: 'text-lg font-medium my-1',
+    h5: 'text-base font-normal my-1',
+  },
+  image: 'max-w-full h-auto my-2',
+  link: 'text-blue-600 hover:underline',
+  list: {
+    listitem: 'my-1',
+    nested: {
+      listitem: 'ml-4 my-1',
+    },
+    ol: 'list-decimal list-inside my-2',
+    ul: 'list-disc list-inside my-2',
+  },
+  ltr: 'text-left',
+  paragraph: 'text-sm my-2',
+  placeholder: 'text-gray-400 italic',
+  quote: 'border-l-4 border-gray-300 pl-4 italic my-2 text-gray-600',
+  rtl: 'text-right',
+  text: {
+    bold: 'font-bold',
+    code: 'font-mono bg-gray-100 text-xs p-0.5 rounded',
+    hashtag: 'text-blue-500 hover:underline',
+    italic: 'italic',
+    overflowed: 'overflow-hidden text-ellipsis whitespace-nowrap',
+    strikethrough: 'line-through',
+    underline: 'underline',
+    underlineStrikethrough: 'underline line-through',
+  },
+}

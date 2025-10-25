@@ -34,6 +34,12 @@ function getFileTree(
   return tree
 }
 
+async function getFile(file: FileTreeNode) {
+  const contents = await fs.promises.readFile(file.id)
+  return contents.toString()
+}
+
 contextBridge.exposeInMainWorld('api', {
   getFileTree,
+  getFile,
 })

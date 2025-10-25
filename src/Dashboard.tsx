@@ -14,7 +14,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { FileTreeProvider, useFileTree } from './FileTree/FileTreeContext'
-import { Editor } from './Editor'
+import { Editor, EditorProvider } from './Editor'
 
 export function Dashboard() {
   const { selectedFile } = useFileTree()
@@ -46,7 +46,9 @@ export function Dashboard() {
           </Breadcrumb>
         </header>
         <div className='flex flex-1 flex-col gap-4 p-4'>
-          <Editor />
+          <EditorProvider>
+            <Editor />
+          </EditorProvider>
         </div>
       </SidebarInset>
     </SidebarProvider>

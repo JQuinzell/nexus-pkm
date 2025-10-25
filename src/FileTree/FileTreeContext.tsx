@@ -6,6 +6,14 @@ import {
   type PropsWithChildren,
 } from 'react'
 import type { FileTree, FileTreeNode } from '..'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import {
+  $convertFromMarkdownString,
+  ELEMENT_TRANSFORMERS,
+  HEADING,
+  TEXT_FORMAT_TRANSFORMERS,
+  TRANSFORMERS,
+} from '@lexical/markdown'
 
 export type FileTreeContextValue = {
   tree: FileTree
@@ -45,4 +53,27 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
       {children}
     </FileTreeContext.Provider>
   )
+}
+
+export function useFileContents(file: FileTreeNode | null) {
+  const [editor] = useLexicalComposerContext()
+  const [fileContents, setFileContents] = useState<string | null>(null)
+  const { selectedFile } = useFileTree()
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setFileContents(null)
+      return
+    }
+
+    window.api.getFile(selectedFile).then((contents) => {
+      console.log('Got contents')
+      console.log(contents)
+      editor.update(() => {
+        $convertFromMarkdownString(contents)
+      })
+    })
+  }, [file])
+
+  return fileContents
 }
