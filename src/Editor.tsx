@@ -4,13 +4,18 @@ import {
 } from '@lexical/react/LexicalComposer'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
+import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
 import EditorTheme from './EditorTheme'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { useEffect, type PropsWithChildren } from 'react'
 import { useFileContents, useFileTree } from './FileTree/FileTreeContext'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
+import { ListItemNode, ListNode } from '@lexical/list'
+import { CodeNode } from '@lexical/code'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $convertToMarkdownString } from '@lexical/markdown'
+import { $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown'
+import { LinkNode } from '@lexical/link'
+
 function onError(error: unknown) {
   console.error(error)
 }
@@ -20,7 +25,7 @@ export function EditorProvider({ children }: PropsWithChildren) {
     namespace: 'nexus-pkm-editor',
     onError,
     theme: EditorTheme,
-    nodes: [HeadingNode, QuoteNode],
+    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, LinkNode],
   }
 
   return (
@@ -46,6 +51,7 @@ export function Editor() {
         }
         ErrorBoundary={LexicalErrorBoundary}
       />
+      <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
     </div>
   )
 }
