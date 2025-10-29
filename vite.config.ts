@@ -20,6 +20,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    // TODO: need better way to preserve electron files
     emptyOutDir: false,
   },
   // Use relative paths for Electron

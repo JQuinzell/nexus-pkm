@@ -15,6 +15,7 @@ import { CodeNode } from '@lexical/code'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown'
 import { LinkNode } from '@lexical/link'
+import { FILE_LINK_TRANSFORMER, FileLinkNode } from './FileLinkNode'
 
 function onError(error: unknown) {
   console.error(error)
@@ -25,7 +26,15 @@ export function EditorProvider({ children }: PropsWithChildren) {
     namespace: 'nexus-pkm-editor',
     onError,
     theme: EditorTheme,
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, LinkNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+      LinkNode,
+      FileLinkNode,
+    ],
   }
 
   return (
@@ -51,7 +60,9 @@ export function Editor() {
         }
         ErrorBoundary={LexicalErrorBoundary}
       />
-      <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+      <MarkdownShortcutPlugin
+        transformers={[...TRANSFORMERS, FILE_LINK_TRANSFORMER]}
+      />
     </div>
   )
 }

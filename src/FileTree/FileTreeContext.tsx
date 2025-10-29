@@ -15,11 +15,13 @@ import {
   TEXT_FORMAT_TRANSFORMERS,
   TRANSFORMERS,
 } from '@lexical/markdown'
+import { FILE_LINK_TRANSFORMER } from '@/FileLinkNode'
 
 export type FileTreeContextValue = {
   tree: FileTree
   selectedFile: FileTreeNode | null
   setSelectedFile: (file: FileTreeNode) => void
+  fileMap: Map<string, FileTreeNode>
 }
 
 const FileTreeContext = createContext<FileTreeContextValue | null>(null)
@@ -38,6 +40,17 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
   const [tree, setTree] = useState<FileTree>([])
   const [selectedFile, setSelectedFile] = useState<FileTreeNode | null>(null)
 
+  function flattenFiles(node: FileTreeNode): FileTreeNode[] {
+    const allChildren = node.children.flatMap((child) => flattenFiles(child))
+    return [node, ...allChildren]
+  }
+
+  const files = tree.flatMap(flattenFiles)
+
+  const fileMap = new Map<string, FileTreeNode>(
+    files.map((node) => [node.name, node])
+  )
+
   useEffect(() => {
     const tree = window.api.getFileTree()
     setTree(tree)
@@ -47,6 +60,7 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
     tree,
     selectedFile,
     setSelectedFile,
+    fileMap,
   }
 
   return (
@@ -69,7 +83,10 @@ export function useFileContents(file: FileTreeNode | null) {
 
     window.api.getFile(selectedFile).then((contents) => {
       editor.update(() => {
-        $convertFromMarkdownString(contents)
+        $convertFromMarkdownString(contents, [
+          ...TRANSFORMERS,
+          FILE_LINK_TRANSFORMER,
+        ])
       })
     })
   }, [file])
@@ -80,7 +97,7 @@ export function useFileContents(file: FileTreeNode | null) {
       editorState.read(() => {
         window.api.writeFile(
           selectedFile,
-          $convertToMarkdownString(TRANSFORMERS)
+          $convertToMarkdownString([...TRANSFORMERS, FILE_LINK_TRANSFORMER])
         )
       })
     })
