@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ChevronRight, File, Folder } from 'lucide-react'
+import { ChevronRight, File, FilePlus, Folder, FolderPlus } from 'lucide-react'
 
 import {
   Collapsible,
@@ -12,6 +12,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -20,11 +21,23 @@ import {
 } from '@/components/ui/sidebar'
 import { useFileTree } from '@/FileTree/FileTreeContext'
 import type { FileTreeNode } from '..'
+import { Button } from './ui/button'
+import { ButtonGroup } from './ui/button-group'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { tree, setSelectedFile, selectedFile } = useFileTree()
   return (
     <Sidebar {...props}>
+      <SidebarHeader>
+        <ButtonGroup>
+          <Button variant='ghost' size='icon'>
+            <FilePlus />
+          </Button>
+          <Button variant='ghost' size='icon'>
+            <FolderPlus />
+          </Button>
+        </ButtonGroup>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Files</SidebarGroupLabel>
