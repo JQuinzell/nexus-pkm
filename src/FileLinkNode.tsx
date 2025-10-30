@@ -68,5 +68,6 @@ export const FILE_LINK_TRANSFORMER: TextMatchTransformer = {
     // TODO: how do I fix this type error
     return node as any
   },
+  trigger: ']]',
   type: 'text-match',
 }
