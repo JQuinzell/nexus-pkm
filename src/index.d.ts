@@ -11,6 +11,8 @@ export interface ElectronAPI {
   getFileTree: () => FileTree
   getFile: (file: FileTreeNode) => Promise<string>
   writeFile: (file: FileTreeNode, contents: string) => Promise<void>
+  createFile: (name: string, parent?: FileTreeNode) => Promise<FileTreeNode>
+  createFolder: (name: string, parent?: FileTreeNode) => Promise<FileTreeNode>
 }
 
 declare global {

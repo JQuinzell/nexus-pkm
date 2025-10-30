@@ -25,15 +25,16 @@ import { Button } from './ui/button'
 import { ButtonGroup } from './ui/button-group'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { tree, setSelectedFile, selectedFile } = useFileTree()
+  const { tree, setSelectedFile, selectedFile, createFile, createFolder } =
+    useFileTree()
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <ButtonGroup>
-          <Button variant='ghost' size='icon'>
+          <Button variant='ghost' size='icon' onClick={createFile}>
             <FilePlus />
           </Button>
-          <Button variant='ghost' size='icon'>
+          <Button variant='ghost' size='icon' onClick={createFolder}>
             <FolderPlus />
           </Button>
         </ButtonGroup>
@@ -78,7 +79,7 @@ function Tree({
     onClick?.(node)
   }
 
-  if (!items.length) {
+  if (item.type === 'file') {
     return (
       <SidebarMenuButton
         isActive={item.id === selectedFile?.id}

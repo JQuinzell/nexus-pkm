@@ -41,8 +41,34 @@ async function writeFile(file: FileTreeNode, contents: string) {
   await fs.promises.writeFile(file.id, contents)
 }
 
+async function createFile(name: string): Promise<FileTreeNode> {
+  const filePath = path.join(vaultPath, name)
+  await fs.promises.writeFile(filePath, '')
+  return {
+    id: filePath,
+    name,
+    type: 'file',
+    children: [],
+    parent: undefined,
+  }
+}
+
+async function createFolder(name: string): Promise<FileTreeNode> {
+  const folderPath = path.join(vaultPath, name)
+  await fs.promises.mkdir(folderPath)
+  return {
+    id: folderPath,
+    name,
+    type: 'folder',
+    children: [],
+    parent: undefined,
+  }
+}
+
 contextBridge.exposeInMainWorld('api', {
   getFileTree,
   getFile,
   writeFile,
+  createFile,
+  createFolder,
 })
