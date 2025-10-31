@@ -38,6 +38,21 @@ export function useFileTree() {
   return context
 }
 
+function generateUniqueName(
+  fileMap: Map<string, FileTreeNode>,
+  getName: (i: number) => string
+) {
+  let i = 1
+  let newName = getName(i)
+
+  while (fileMap.has(newName)) {
+    i++
+    newName = getName(i)
+  }
+
+  return newName
+}
+
 export function FileTreeProvider({ children }: PropsWithChildren) {
   const [tree, setTree] = useState<FileTree>([])
   const [selectedFile, setSelectedFile] = useState<FileTreeNode | null>(null)
@@ -59,28 +74,16 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
   }, [])
 
   async function createFile(parent?: FileTreeNode) {
-    let i = 0
-    let name = ''
-    do {
-      i++
-      name = `Untitled ${i}.md`
-    } while (fileMap.has(name))
+    const name = generateUniqueName(fileMap, (i) => `Untitled ${i}.md`)
     const node = await window.api.createFile(name, parent)
     setTree([...tree, node])
   }
 
   async function createFolder(parent?: FileTreeNode) {
-    let i = 0
-    let name = ''
-    do {
-      i++
-      name = `folder ${i}`
-    } while (fileMap.has(name))
+    const name = generateUniqueName(fileMap, (i) => `folder ${i}`)
     const node = await window.api.createFolder(name, parent)
     setTree([...tree, node])
   }
-
-  console.log(tree)
 
   const value = {
     tree,
