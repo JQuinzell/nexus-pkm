@@ -22,8 +22,8 @@ export type FileTreeContextValue = {
   selectedFile: FileTreeNode | null
   setSelectedFile: (file: FileTreeNode) => void
   fileMap: Map<string, FileTreeNode>
-  createFile: () => void
-  createFolder: () => void
+  createFile: (parent?: FileTreeNode) => void
+  createFolder: (parent?: FileTreeNode) => void
 }
 
 const FileTreeContext = createContext<FileTreeContextValue | null>(null)
@@ -58,27 +58,29 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
     setTree(tree)
   }, [])
 
-  async function createFile() {
+  async function createFile(parent?: FileTreeNode) {
     let i = 0
     let name = ''
     do {
       i++
       name = `Untitled ${i}.md`
     } while (fileMap.has(name))
-    const node = await window.api.createFile(name)
+    const node = await window.api.createFile(name, parent)
     setTree([...tree, node])
   }
 
-  async function createFolder() {
+  async function createFolder(parent?: FileTreeNode) {
     let i = 0
     let name = ''
     do {
       i++
       name = `folder ${i}`
     } while (fileMap.has(name))
-    const node = await window.api.createFolder(name)
+    const node = await window.api.createFolder(name, parent)
     setTree([...tree, node])
   }
+
+  console.log(tree)
 
   const value = {
     tree,

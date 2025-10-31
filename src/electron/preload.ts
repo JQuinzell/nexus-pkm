@@ -41,8 +41,11 @@ async function writeFile(file: FileTreeNode, contents: string) {
   await fs.promises.writeFile(file.id, contents)
 }
 
-async function createFile(name: string): Promise<FileTreeNode> {
-  const filePath = path.join(vaultPath, name)
+async function createFile(
+  name: string,
+  parent?: FileTreeNode
+): Promise<FileTreeNode> {
+  const filePath = path.join(parent?.id ?? vaultPath, name)
   await fs.promises.writeFile(filePath, '')
   return {
     id: filePath,
@@ -53,8 +56,11 @@ async function createFile(name: string): Promise<FileTreeNode> {
   }
 }
 
-async function createFolder(name: string): Promise<FileTreeNode> {
-  const folderPath = path.join(vaultPath, name)
+async function createFolder(
+  name: string,
+  parent?: FileTreeNode
+): Promise<FileTreeNode> {
+  const folderPath = path.join(parent?.id ?? vaultPath, name)
   await fs.promises.mkdir(folderPath)
   return {
     id: folderPath,

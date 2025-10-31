@@ -1,5 +1,12 @@
 import * as React from 'react'
-import { ChevronRight, File, FilePlus, Folder, FolderPlus } from 'lucide-react'
+import {
+  ChevronRight,
+  File,
+  FilePlus,
+  Folder,
+  FolderPlus,
+  MoreHorizontal,
+} from 'lucide-react'
 
 import {
   Collapsible,
@@ -14,6 +21,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -23,6 +31,12 @@ import { useFileTree } from '@/FileTree/FileTreeContext'
 import type { FileTreeNode } from '..'
 import { Button } from './ui/button'
 import { ButtonGroup } from './ui/button-group'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from './ui/context-menu'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { tree, setSelectedFile, selectedFile, createFile, createFolder } =
@@ -31,10 +45,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar {...props}>
       <SidebarHeader>
         <ButtonGroup>
-          <Button variant='ghost' size='icon' onClick={createFile}>
+          <Button variant='ghost' size='icon' onClick={() => createFile()}>
             <FilePlus />
           </Button>
-          <Button variant='ghost' size='icon' onClick={createFolder}>
+          <Button variant='ghost' size='icon' onClick={() => createFolder()}>
             <FolderPlus />
           </Button>
         </ButtonGroup>
@@ -52,6 +66,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     setSelectedFile(selectedItem)
                   }}
                   selectedFile={selectedFile}
+                  onCreateFile={(parent) => createFile(parent)}
+                  onCreateFolder={(parent) => createFolder(parent)}
                 />
               ))}
             </SidebarMenu>
@@ -67,10 +83,14 @@ function Tree({
   item,
   onClick,
   selectedFile,
+  onCreateFile,
+  onCreateFolder,
 }: {
   item: FileTreeNode
   onClick?: (item: FileTreeNode) => void
   selectedFile: FileTreeNode | null
+  onCreateFile: (parent: FileTreeNode) => void
+  onCreateFolder: (parent: FileTreeNode) => void
 }) {
   const name = item.name
   const items = item.children
@@ -93,31 +113,45 @@ function Tree({
   }
 
   return (
-    <SidebarMenuItem>
-      <Collapsible
-        className='group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90'
-        defaultOpen={name === 'components' || name === 'ui'}
-      >
-        <CollapsibleTrigger asChild>
-          <SidebarMenuButton>
-            <ChevronRight className='transition-transform' />
-            <Folder />
-            {name}
-          </SidebarMenuButton>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            {items.map((subItem, index) => (
-              <Tree
-                key={index}
-                item={subItem}
-                onClick={handleClick}
-                selectedFile={selectedFile}
-              />
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </Collapsible>
-    </SidebarMenuItem>
+    <ContextMenu>
+      <SidebarMenuItem>
+        <Collapsible
+          className='group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90'
+          defaultOpen={name === 'components' || name === 'ui'}
+        >
+          <CollapsibleTrigger asChild>
+            <ContextMenuTrigger asChild>
+              <SidebarMenuButton>
+                <ChevronRight className='transition-transform' />
+                <Folder />
+                {name}
+                <ContextMenuContent>
+                  <ContextMenuItem onClick={() => onCreateFile(item)}>
+                    <FilePlus /> New File
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => onCreateFolder(item)}>
+                    <FolderPlus /> New Folder
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </SidebarMenuButton>
+            </ContextMenuTrigger>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <SidebarMenuSub>
+              {items.map((subItem, index) => (
+                <Tree
+                  key={index}
+                  item={subItem}
+                  onClick={handleClick}
+                  selectedFile={selectedFile}
+                  onCreateFile={() => onCreateFile(subItem)}
+                  onCreateFolder={() => onCreateFolder(subItem)}
+                />
+              ))}
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </Collapsible>
+      </SidebarMenuItem>
+    </ContextMenu>
   )
 }
