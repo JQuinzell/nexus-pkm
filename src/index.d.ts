@@ -1,6 +1,7 @@
 export type FileTreeNode = {
   id: string
   name: string
+  path: string[]
   type: 'file' | 'folder'
   parent?: FileTreeNode
   children: FileTreeNode[]

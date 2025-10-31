@@ -53,6 +53,31 @@ function generateUniqueName(
   return newName
 }
 
+// TODO don't really like this algorithm I could probably use the path to be a bit more efficient but it works
+function addNode(
+  nodes: FileTreeNode[],
+  parent: FileTreeNode,
+  childNode: FileTreeNode
+): FileTreeNode[] {
+  return nodes.map((node) => {
+    if (node.id === parent.id) {
+      return {
+        ...node,
+        children: [...node.children, childNode],
+      }
+    }
+
+    if (node.children.length > 0) {
+      return {
+        ...node,
+        children: addNode(node.children, parent, childNode),
+      }
+    }
+
+    return node
+  })
+}
+
 export function FileTreeProvider({ children }: PropsWithChildren) {
   const [tree, setTree] = useState<FileTree>([])
   const [selectedFile, setSelectedFile] = useState<FileTreeNode | null>(null)
@@ -76,13 +101,21 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
   async function createFile(parent?: FileTreeNode) {
     const name = generateUniqueName(fileMap, (i) => `Untitled ${i}.md`)
     const node = await window.api.createFile(name, parent)
-    setTree([...tree, node])
+    if (parent) {
+      setTree(addNode(tree, parent, node))
+    } else {
+      setTree([...tree, node])
+    }
   }
 
   async function createFolder(parent?: FileTreeNode) {
     const name = generateUniqueName(fileMap, (i) => `folder ${i}`)
     const node = await window.api.createFolder(name, parent)
-    setTree([...tree, node])
+    if (parent) {
+      setTree(addNode(tree, parent, node))
+    } else {
+      setTree([...tree, node])
+    }
   }
 
   const value = {

@@ -15,9 +15,14 @@ function getFileTree(
     const fullPath = path.join(dirPath, entry)
     const stats = fs.statSync(fullPath)
     const type = stats.isDirectory() ? 'folder' : 'file'
+    const subPath = path
+      .relative(vaultPath, dirPath)
+      .split(path.sep)
+      .filter(Boolean)
     const node: FileTreeNode = {
       id: fullPath,
       name: entry,
+      path: subPath,
       type,
       children: [],
       parent,
@@ -46,10 +51,15 @@ async function createFile(
   parent?: FileTreeNode
 ): Promise<FileTreeNode> {
   const filePath = path.join(parent?.id ?? vaultPath, name)
+  const subPath = path
+    .relative(vaultPath, parent?.id ?? vaultPath)
+    .split(path.sep)
+    .filter(Boolean)
   await fs.promises.writeFile(filePath, '')
   return {
     id: filePath,
     name,
+    path: subPath,
     type: 'file',
     children: [],
     parent: undefined,
@@ -61,10 +71,16 @@ async function createFolder(
   parent?: FileTreeNode
 ): Promise<FileTreeNode> {
   const folderPath = path.join(parent?.id ?? vaultPath, name)
+  const subPath = path
+    .relative(vaultPath, parent?.id ?? vaultPath)
+    .split(path.sep)
+    .filter(Boolean)
+
   await fs.promises.mkdir(folderPath)
   return {
     id: folderPath,
     name,
+    path: subPath,
     type: 'folder',
     children: [],
     parent: undefined,
