@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import { FileTree, FileTreeNode } from '..'
@@ -87,10 +87,15 @@ async function createFolder(
   }
 }
 
+function search(query: string) {
+  return ipcRenderer.invoke('search', query)
+}
+
 contextBridge.exposeInMainWorld('api', {
   getFileTree,
   getFile,
   writeFile,
   createFile,
   createFolder,
+  search,
 })
