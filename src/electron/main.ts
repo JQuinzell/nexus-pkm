@@ -2,6 +2,7 @@ import { BrowserWindow, app, ipcMain } from 'electron'
 import { spawn } from 'node:child_process'
 import path, { join } from 'node:path'
 import z from 'zod'
+import { SearchResult } from '..'
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -48,51 +49,54 @@ const matchSchema = z.object({
   }),
 })
 
-ipcMain.handle('search', async (event, query: string) => {
-  return new Promise((resolve, reject) => {
-    const results: any[] = []
-    const ripgrep = spawn('rg', [
-      query,
-      path.join(__dirname, '../../data'),
-      '--json',
-    ])
+ipcMain.handle(
+  'search',
+  async (event, query: string): Promise<SearchResult[]> => {
+    return new Promise((resolve, reject) => {
+      const results: SearchResult[] = []
+      const ripgrep = spawn('rg', [
+        query,
+        path.join(__dirname, '../../data'),
+        '--json',
+      ])
 
-    ripgrep.stdout.on('data', (data: Buffer) => {
-      data
-        .toString()
-        .split('\n')
-        .filter((line) => line.trim() !== '')
-        .forEach((line) => {
-          try {
-            const result = matchSchema.safeParse(JSON.parse(line))
-            if (result.success) {
-              results.push(result.data)
+      ripgrep.stdout.on('data', (data: Buffer) => {
+        data
+          .toString()
+          .split('\n')
+          .filter((line) => line.trim() !== '')
+          .forEach((line) => {
+            try {
+              const result = matchSchema.safeParse(JSON.parse(line))
+              if (result.success) {
+                results.push(result.data.data)
+              }
+            } catch (e) {
+              console.log(e)
             }
-          } catch (e) {
-            console.log(e)
-          }
-        })
-    })
+          })
+      })
 
-    ripgrep.stderr.on('data', (data) => {
-      console.error(`ripgrep stderr: ${data}`)
-    })
+      ripgrep.stderr.on('data', (data) => {
+        console.error(`ripgrep stderr: ${data}`)
+      })
 
-    ripgrep.on('close', (code) => {
-      if (code === 0 || code === 1) {
-        // ripgrep exits with 1 if no matches are found, which is not an error for us.
-        resolve(results)
-      } else {
-        reject(new Error(`ripgrep process exited with code ${code}`))
-      }
-    })
+      ripgrep.on('close', (code) => {
+        if (code === 0 || code === 1) {
+          // ripgrep exits with 1 if no matches are found, which is not an error for us.
+          resolve(results)
+        } else {
+          reject(new Error(`ripgrep process exited with code ${code}`))
+        }
+      })
 
-    ripgrep.on('error', (err) => {
-      reject(
-        new Error(
-          `Failed to start ripgrep. Is it installed and in your PATH? Error: ${err.message}`
+      ripgrep.on('error', (err) => {
+        reject(
+          new Error(
+            `Failed to start ripgrep. Is it installed and in your PATH? Error: ${err.message}`
+          )
         )
-      )
+      })
     })
-  })
-})
+  }
+)

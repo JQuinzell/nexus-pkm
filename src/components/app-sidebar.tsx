@@ -29,7 +29,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { useFileTree } from '@/FileTree/FileTreeContext'
-import type { FileTreeNode } from '..'
+import type { FileTreeNode, SearchResult } from '..'
 import { Button } from './ui/button'
 import { ButtonGroup } from './ui/button-group'
 import {
@@ -39,6 +39,14 @@ import {
   ContextMenuTrigger,
 } from './ui/context-menu'
 import { useState } from 'react'
+import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group'
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from './ui/item'
 
 const navItems = [
   {
@@ -53,10 +61,15 @@ const navItems = [
   },
 ] as const
 
-function NavSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [activeItem, setActiveItem] = useState<(typeof navItems)[number]>(
-    navItems[0]
-  )
+type NavItem = (typeof navItems)[number]
+
+function NavSidebar({
+  activeItem,
+  setActiveItem,
+}: {
+  activeItem: NavItem
+  setActiveItem: (item: NavItem) => void
+}) {
   return (
     <Sidebar
       collapsible='none'
@@ -110,7 +123,9 @@ function NavSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   )
 }
 
-function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+function FileExplorerSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   const { tree, setSelectedFile, selectedFile, createFile, createFolder } =
     useFileTree()
   return (
@@ -151,15 +166,62 @@ function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   )
 }
 
+function SearchSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+
+  async function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const query = event.target.value.trim()
+    setSearchResults([])
+    if (query) {
+      const results = await window.api.search(query)
+      setSearchResults(results)
+    }
+  }
+
+  return (
+    <Sidebar {...props} collapsible='none' className='hidden flex-1 md:flex'>
+      <SidebarHeader>
+        <InputGroup>
+          <InputGroupInput placeholder='Search...' onChange={handleChange} />
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+        </InputGroup>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Results</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {searchResults.map((result) => (
+              <Item key={result.path.text} className='border-b'>
+                <ItemContent>
+                  <ItemTitle>{result.path.text}</ItemTitle>
+                  <ItemDescription>{result.lines.text}</ItemDescription>
+                </ItemContent>
+              </Item>
+            ))}
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
+  )
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [activeItem, setActiveItem] = useState<(typeof navItems)[number]>(
+    navItems[0]
+  )
+
   return (
     <Sidebar
       collapsible='icon'
       className='overflow-hidden *:data-[sidebar=sidebar]:flex-row'
       {...props}
     >
-      <NavSidebar />
-      <MainSidebar />
+      <NavSidebar activeItem={activeItem} setActiveItem={setActiveItem} />
+      {activeItem.title === 'Files' && <FileExplorerSidebar />}
+      {activeItem.title === 'Search' && <SearchSidebar />}
     </Sidebar>
   )
 }
