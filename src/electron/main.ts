@@ -49,16 +49,14 @@ const matchSchema = z.object({
   }),
 })
 
+const vaultPath = path.join(__dirname, '../../data')
+
 ipcMain.handle(
   'search',
   async (event, query: string): Promise<SearchResult[]> => {
     return new Promise((resolve, reject) => {
       const results: SearchResult[] = []
-      const ripgrep = spawn('rg', [
-        query,
-        path.join(__dirname, '../../data'),
-        '--json',
-      ])
+      const ripgrep = spawn('rg', [query, vaultPath, '--json'])
 
       ripgrep.stdout.on('data', (data: Buffer) => {
         data
@@ -69,6 +67,11 @@ ipcMain.handle(
             try {
               const result = matchSchema.safeParse(JSON.parse(line))
               if (result.success) {
+                const searchResult = result.data.data
+                searchResult.path.text = path
+                  .relative(vaultPath, searchResult.path.text)
+                  .split(path.sep)
+                  .join('/')
                 results.push(result.data.data)
               }
             } catch (e) {
