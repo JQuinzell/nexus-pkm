@@ -24,6 +24,10 @@ export type FileTreeContextValue = {
   fileMap: Map<string, FileTreeNode>
   createFile: (parent?: FileTreeNode) => void
   createFolder: (parent?: FileTreeNode) => void
+  tabs: FileTreeNode[]
+  addTab: (file: FileTreeNode) => void
+  removeTab: (file: FileTreeNode) => void
+  openFile: (file: FileTreeNode) => void
 }
 
 const FileTreeContext = createContext<FileTreeContextValue | null>(null)
@@ -81,6 +85,15 @@ function addNode(
 export function FileTreeProvider({ children }: PropsWithChildren) {
   const [tree, setTree] = useState<FileTree>([])
   const [selectedFile, setSelectedFile] = useState<FileTreeNode | null>(null)
+  const [tabs, setTabs] = useState<FileTreeNode[]>([])
+
+  function addTab(file: FileTreeNode) {
+    setTabs((tabs) => [...tabs, file])
+  }
+
+  function removeTab(file: FileTreeNode) {
+    setTabs((tabs) => tabs.filter((tab) => tab.id !== file.id))
+  }
 
   function flattenFiles(node: FileTreeNode): FileTreeNode[] {
     const allChildren = node.children.flatMap((child) => flattenFiles(child))
@@ -118,6 +131,13 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
     }
   }
 
+  function openFile(file: FileTreeNode) {
+    setSelectedFile(file)
+    if (!tabs.find((tab) => tab.id === file.id)) {
+      addTab(file)
+    }
+  }
+
   const value = {
     tree,
     selectedFile,
@@ -125,6 +145,10 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
     fileMap,
     createFile,
     createFolder,
+    tabs,
+    addTab,
+    removeTab,
+    openFile,
   }
 
   return (

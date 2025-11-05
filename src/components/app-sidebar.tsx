@@ -126,7 +126,7 @@ function NavSidebar({
 function FileExplorerSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const { tree, setSelectedFile, selectedFile, createFile, createFolder } =
+  const { tree, openFile, selectedFile, createFile, createFolder } =
     useFileTree()
   return (
     <Sidebar {...props} collapsible='none' className='hidden flex-1 md:flex'>
@@ -150,7 +150,7 @@ function FileExplorerSidebar({
                   key={index}
                   item={item}
                   onClick={(selectedItem) => {
-                    setSelectedFile(selectedItem)
+                    openFile(selectedItem)
                   }}
                   selectedFile={selectedFile}
                   onCreateFile={(parent) => createFile(parent)}
@@ -262,10 +262,7 @@ function Tree({
   return (
     <ContextMenu>
       <SidebarMenuItem>
-        <Collapsible
-          className='group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90'
-          defaultOpen={name === 'components' || name === 'ui'}
-        >
+        <Collapsible className='group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90'>
           <CollapsibleTrigger asChild>
             <ContextMenuTrigger asChild>
               <SidebarMenuButton>

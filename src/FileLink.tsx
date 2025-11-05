@@ -5,12 +5,12 @@ type Props = {
 }
 
 export function FileLink({ fileId }: Props) {
-  const { fileMap, setSelectedFile } = useFileTree()
+  const { fileMap, openFile } = useFileTree()
   const file = fileMap.get(fileId)
 
   function handleClick() {
     if (file) {
-      setSelectedFile(file)
+      openFile(file)
     }
   }
   return (

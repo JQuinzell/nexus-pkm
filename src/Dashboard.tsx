@@ -1,24 +1,44 @@
 import { AppSidebar } from '@/components/app-sidebar'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { FileTreeProvider, useFileTree } from './FileTree/FileTreeContext'
+import { useFileTree } from './FileTree/FileTreeContext'
 import { Editor, EditorProvider } from './Editor'
+import { Button } from './components/ui/button'
+import { X } from 'lucide-react'
+import { ButtonGroup } from './components/ui/button-group'
+
+function FileTabs() {
+  const { selectedFile, tabs, openFile, removeTab } = useFileTree()
+
+  return (
+    <div className='flex gap-2 items-center'>
+      {tabs.map((file) => {
+        const variant = selectedFile?.id === file.id ? 'secondary' : 'ghost'
+        return (
+          <ButtonGroup key={file.id}>
+            <Button
+              key={file.id}
+              variant={variant}
+              onClick={() => openFile(file)}
+              size='sm'
+            >
+              {file.name}
+            </Button>
+            <Button size='sm' variant={variant} onClick={() => removeTab(file)}>
+              <X />
+            </Button>
+          </ButtonGroup>
+        )
+      })}
+    </div>
+  )
+}
 
 export function Dashboard() {
-  const { selectedFile } = useFileTree()
-
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -29,21 +49,7 @@ export function Dashboard() {
             orientation='vertical'
             className='mr-2 data-[orientation=vertical]:h-4'
           />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className='hidden md:block'>
-                <BreadcrumbLink href='#'>{selectedFile?.name}</BreadcrumbLink>
-              </BreadcrumbItem>
-              {/* <BreadcrumbSeparator className='hidden md:block' />
-                <BreadcrumbItem className='hidden md:block'>
-                  <BreadcrumbLink href='#'>ui</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className='hidden md:block' />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>button.tsx</BreadcrumbPage>
-                </BreadcrumbItem> */}
-            </BreadcrumbList>
-          </Breadcrumb>
+          <FileTabs />
         </header>
         <div className='flex flex-1 flex-col gap-4 p-4'>
           <EditorProvider>
