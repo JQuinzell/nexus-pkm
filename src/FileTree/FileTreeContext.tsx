@@ -5,17 +5,24 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react'
-import type { FileTree, FileTreeNode } from '..'
+import type { FileMetadata, FileTree, FileTreeNode } from '..'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
-  ELEMENT_TRANSFORMERS,
-  HEADING,
-  TEXT_FORMAT_TRANSFORMERS,
   TRANSFORMERS,
 } from '@lexical/markdown'
-import { FILE_LINK_TRANSFORMER } from '@/FileLinkNode'
+import { FILE_LINK_TRANSFORMER, FileLinkNode } from '@/FileLinkNode'
+import { $getRoot, createEditor, type LexicalEditor } from 'lexical'
+import { LinkNode } from '@lexical/link'
+import { HeadingNode, QuoteNode } from '@lexical/rich-text'
+import { ListItemNode, ListNode } from '@lexical/list'
+import { CodeNode } from '@lexical/code'
+import {
+  $isFrontMatterNode,
+  FRONT_MATTER_TRANSFORMER,
+  FrontMatterNode,
+} from '@/FrontMatterNode'
 
 export type FileTreeContextValue = {
   tree: FileTree
@@ -82,6 +89,34 @@ function addNode(
   })
 }
 
+async function createMetadataIndex(tree: FileTree, editor: LexicalEditor) {
+  const metadataMap: FileMetadata = {}
+  async function parseNode(node: FileTreeNode) {
+    if (node.type === 'file') {
+      const contents = await window.api.getFile(node)
+      editor.update(() => {
+        $convertFromMarkdownString(contents, [
+          ...TRANSFORMERS,
+          FILE_LINK_TRANSFORMER,
+          FRONT_MATTER_TRANSFORMER,
+        ])
+        const root = $getRoot()
+        const frontMatter = root.getChildren().find($isFrontMatterNode)
+        if (frontMatter) {
+          metadataMap[node.path.concat(node.name).join('/')] = {
+            properties: frontMatter.getProperties(),
+          }
+        }
+      })
+    } else {
+      await Promise.all(node.children.map(parseNode))
+    }
+  }
+
+  await Promise.all(tree.map(parseNode))
+  await window.api.createMetadataIndex(metadataMap)
+}
+
 export function FileTreeProvider({ children }: PropsWithChildren) {
   const [tree, setTree] = useState<FileTree>([])
   const [selectedFile, setSelectedFile] = useState<FileTreeNode | null>(null)
@@ -109,6 +144,21 @@ export function FileTreeProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     const tree = window.api.getFileTree()
     setTree(tree)
+    const editor = createEditor({
+      namespace: 'nexus-pkm-index-editor',
+      onError: console.error,
+      nodes: [
+        HeadingNode,
+        QuoteNode,
+        ListNode,
+        ListItemNode,
+        CodeNode,
+        LinkNode,
+        FileLinkNode,
+        FrontMatterNode,
+      ],
+    })
+    createMetadataIndex(tree, editor)
   }, [])
 
   async function createFile(parent?: FileTreeNode) {
@@ -174,6 +224,7 @@ export function useFileContents(file: FileTreeNode | null) {
         $convertFromMarkdownString(contents, [
           ...TRANSFORMERS,
           FILE_LINK_TRANSFORMER,
+          FRONT_MATTER_TRANSFORMER,
         ])
       })
     })
@@ -185,7 +236,11 @@ export function useFileContents(file: FileTreeNode | null) {
       editorState.read(() => {
         window.api.writeFile(
           selectedFile,
-          $convertToMarkdownString([...TRANSFORMERS, FILE_LINK_TRANSFORMER])
+          $convertToMarkdownString([
+            ...TRANSFORMERS,
+            FILE_LINK_TRANSFORMER,
+            FRONT_MATTER_TRANSFORMER,
+          ])
         )
       })
     })

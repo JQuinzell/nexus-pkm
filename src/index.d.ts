@@ -6,6 +6,12 @@ export type FileTreeNode = {
   parent?: FileTreeNode
   children: FileTreeNode[]
 }
+
+export type FileMetadataEntry = {
+  properties: Record<string, string>
+}
+
+export type FileMetadata = Record<string, FileMetadataEntry>
 /**
  *   type: z.literal('match'),
   data: z.object({
@@ -56,6 +62,7 @@ export interface ElectronAPI {
   createFile: (name: string, parent?: FileTreeNode) => Promise<FileTreeNode>
   createFolder: (name: string, parent?: FileTreeNode) => Promise<FileTreeNode>
   search: (query: string) => Promise<SearchResult[]>
+  createMetadataIndex: (metadata: FileMetadata) => Promise<void>
 }
 
 declare global {

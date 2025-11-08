@@ -16,6 +16,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown'
 import { LinkNode } from '@lexical/link'
 import { FILE_LINK_TRANSFORMER, FileLinkNode } from './FileLinkNode'
+import { FrontMatterNode } from './FrontMatterNode'
 
 function onError(error: unknown) {
   console.error(error)
@@ -34,6 +35,7 @@ export function EditorProvider({ children }: PropsWithChildren) {
       CodeNode,
       LinkNode,
       FileLinkNode,
+      FrontMatterNode,
     ],
   }
 
