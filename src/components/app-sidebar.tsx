@@ -194,7 +194,9 @@ function SearchSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       const results = Object.entries(propertiesIndex)
         .map(([file, entry]) => {
           const property = Object.entries(entry.properties).find(
-            ([key]) => key === propertyQuery.property
+            ([key, value]) =>
+              key === propertyQuery.property &&
+              value.includes(propertyQuery.value)
           )
           return property
             ? { file, text: `${property[0]}:${property[1]}` }
