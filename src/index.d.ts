@@ -63,6 +63,7 @@ export interface ElectronAPI {
   createFolder: (name: string, parent?: FileTreeNode) => Promise<FileTreeNode>
   search: (query: string) => Promise<SearchResult[]>
   createMetadataIndex: (metadata: FileMetadata) => Promise<void>
+  getMetadataIndex: () => Promise<FileMetadata>
 }
 
 declare global {

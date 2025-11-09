@@ -166,15 +166,44 @@ function FileExplorerSidebar({
   )
 }
 
+function getPropertySearch(query: string) {
+  const match = /\[(.*):(.*)\]/.exec(query)
+  if (!match) return null
+  const [, property, value] = match
+  return { property, value }
+}
+
 function SearchSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searchResults, setSearchResults] = useState<
+    { file: string; text: string }[]
+  >([])
 
   async function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const query = event.target.value.trim()
     setSearchResults([])
-    if (query) {
-      const results = await window.api.search(query)
+    if (!query) return
+    const propertyQuery = getPropertySearch(query)
+    if (propertyQuery) {
+      const propertiesIndex = await window.api.getMetadataIndex()
+      const results = Object.entries(propertiesIndex)
+        .map(([file, entry]) => {
+          const property = Object.entries(entry.properties).find(
+            ([key]) => key === propertyQuery.property
+          )
+          return property
+            ? { file, text: `${property[0]}:${property[1]}` }
+            : null
+        })
+        .filter((v) => !!v)
       setSearchResults(results)
+    } else if (query) {
+      const results = await window.api.search(query)
+      setSearchResults(
+        results.map((result) => ({
+          file: result.path.text,
+          text: result.lines.text,
+        }))
+      )
     }
   }
 
@@ -193,10 +222,10 @@ function SearchSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Results</SidebarGroupLabel>
           <SidebarGroupContent>
             {searchResults.map((result) => (
-              <Item key={result.path.text} className='border-b'>
+              <Item key={result.file} className='border-b'>
                 <ItemContent>
-                  <ItemTitle>{result.path.text}</ItemTitle>
-                  <ItemDescription>{result.lines.text}</ItemDescription>
+                  <ItemTitle>{result.file}</ItemTitle>
+                  <ItemDescription>{result.text}</ItemDescription>
                 </ItemContent>
               </Item>
             ))}

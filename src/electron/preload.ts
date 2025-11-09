@@ -91,10 +91,15 @@ async function createFolder(
 }
 
 async function createMetadataIndex(metadata: FileMetadata) {
-  fs.promises.writeFile(
+  await fs.promises.writeFile(
     path.join(vaultPath, '.metadata'),
     JSON.stringify(metadata)
   )
+}
+
+async function getMetadataIndex() {
+  const res = await fs.promises.readFile(path.join(vaultPath, '.metadata'))
+  return JSON.parse(res.toString()) as FileMetadata
 }
 
 function search(query: string) {
@@ -109,4 +114,5 @@ contextBridge.exposeInMainWorld('api', {
   createFolder,
   search,
   createMetadataIndex,
+  getMetadataIndex,
 })
