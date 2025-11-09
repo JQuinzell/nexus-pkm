@@ -40,7 +40,7 @@ export class FileLinkNode extends DecoratorNode<ReactElement> {
   }
 }
 
-function $isFileLinkNode(node: LexicalNode): node is FileLinkNode {
+export function $isFileLinkNode(node: LexicalNode): node is FileLinkNode {
   return node instanceof FileLinkNode
 }
 

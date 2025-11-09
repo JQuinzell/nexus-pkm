@@ -13,7 +13,12 @@ import {
   TRANSFORMERS,
 } from '@lexical/markdown'
 import { FILE_LINK_TRANSFORMER, FileLinkNode } from '@/FileLinkNode'
-import { $getRoot, createEditor, type LexicalEditor } from 'lexical'
+import {
+  $getRoot,
+  $nodesOfType,
+  createEditor,
+  type LexicalEditor,
+} from 'lexical'
 import { LinkNode } from '@lexical/link'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListItemNode, ListNode } from '@lexical/list'
@@ -102,11 +107,27 @@ async function createMetadataIndex(tree: FileTree, editor: LexicalEditor) {
         ])
         const root = $getRoot()
         const frontMatter = root.getChildren().find($isFrontMatterNode)
-        if (frontMatter) {
-          metadataMap[node.path.concat(node.name).join('/')] = {
-            properties: frontMatter.getProperties(),
-          }
+        // TODO: ideally I would like to find and process these nodes using a listener
+        // but for some reason, the mutation listener does not detect these being added.
+        const linkNodes = $nodesOfType(FileLinkNode)
+        const filePath = node.path.concat(node.name).join('/')
+        metadataMap[filePath] = {
+          properties: frontMatter?.getProperties() ?? {},
+          outgoing: linkNodes.map((link) => link.fileName),
+          incoming: metadataMap[filePath]?.incoming ?? [],
         }
+        linkNodes.forEach((link) => {
+          const existingEntry = metadataMap[link.fileName]
+          if (existingEntry) {
+            existingEntry.incoming.push(filePath)
+          } else {
+            metadataMap[link.fileName] = {
+              properties: {},
+              outgoing: [],
+              incoming: [filePath],
+            }
+          }
+        })
       })
     } else {
       await Promise.all(node.children.map(parseNode))

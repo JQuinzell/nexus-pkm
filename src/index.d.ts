@@ -9,6 +9,8 @@ export type FileTreeNode = {
 
 export type FileMetadataEntry = {
   properties: Record<string, string>
+  outgoing: string[]
+  incoming: string[]
 }
 
 export type FileMetadata = Record<string, FileMetadataEntry>
