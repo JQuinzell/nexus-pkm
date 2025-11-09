@@ -3,6 +3,7 @@ import {
   ChevronRight,
   File,
   FilePlus,
+  FileSymlink,
   Folder,
   FolderPlus,
   MoreHorizontal,
@@ -29,7 +30,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { useFileTree } from '@/FileTree/FileTreeContext'
-import type { FileTreeNode, SearchResult } from '..'
+import type { FileMetadata, FileTreeNode, SearchResult } from '..'
 import { Button } from './ui/button'
 import { ButtonGroup } from './ui/button-group'
 import {
@@ -38,7 +39,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from './ui/context-menu'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group'
 import {
   Item,
@@ -58,6 +59,11 @@ const navItems = [
     title: 'Search',
     url: '#',
     icon: Search,
+  },
+  {
+    title: 'Incoming Links',
+    url: '#',
+    icon: FileSymlink,
   },
 ] as const
 
@@ -237,6 +243,54 @@ function SearchSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   )
 }
 
+function IncomingLinksSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const { selectedFile } = useFileTree()
+  const [metadata, setMetadata] = useState<FileMetadata>({})
+  useEffect(() => {
+    window.api.getMetadataIndex().then((metadata) => {
+      setMetadata(metadata)
+    })
+  }, [])
+
+  const fileMetadata = selectedFile
+    ? metadata[selectedFile.path.concat(selectedFile.name).join('/')]
+    : null
+  return (
+    <Sidebar {...props} collapsible='none' className='hidden flex-1 md:flex'>
+      <SidebarHeader>Incoming Links</SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Incoming</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {fileMetadata?.incoming.map((file) => (
+              <Item key={file} className='border-b'>
+                <ItemContent>
+                  <ItemTitle>{file}</ItemTitle>
+                </ItemContent>
+              </Item>
+            ))}
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Outgoing</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {fileMetadata?.outgoing.map((file) => (
+              <Item key={file} className='border-b'>
+                <ItemContent>
+                  <ItemTitle>{file}</ItemTitle>
+                </ItemContent>
+              </Item>
+            ))}
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
+  )
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [activeItem, setActiveItem] = useState<(typeof navItems)[number]>(
     navItems[0]
@@ -251,6 +305,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <NavSidebar activeItem={activeItem} setActiveItem={setActiveItem} />
       {activeItem.title === 'Files' && <FileExplorerSidebar />}
       {activeItem.title === 'Search' && <SearchSidebar />}
+      {activeItem.title === 'Incoming Links' && <IncomingLinksSidebar />}
     </Sidebar>
   )
 }
